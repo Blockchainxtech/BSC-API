@@ -1,3 +1,4 @@
 PORT=3000
 TESTNET=https://data-seed-prebsc-1-s1.binance.org:8545
 MAINNET=https://bsc-dataseed1.binance.org:443
+CONTRACT_ADDRESS=ENTER_CONTRACT_ADDRESS
