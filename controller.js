@@ -21,7 +21,7 @@ async function getBalance(req, res) {
         let balance = await web3.eth.getBalance(req.body.address);
         res.status(200).send({ status: true, balance: web3.utils.fromWei(balance, 'ether') });
     } catch(error) {
-        res.status(500).send({ status: false, message: 'Create Account Failed' });
+        res.status(500).send({ status: false, message: 'Get BNB Balance Failed' });
     }
 }
 
@@ -33,9 +33,10 @@ async function getTokenBalance(req, res) {
         // contract instance
         const contract = new web3.eth.Contract(abi, process.env.CONTRACT_ADDRESS);
         const balance = await contract.methods.balanceOf(req.body.address).call();
-        res.status(200).send({ status: true, balance: web3.utils.fromWei(balance, 'ether') });
+        const decimals = await contract.methods.decimals().call();
+        res.status(200).send({ status: true, balance: balance / 10**decimals });
     } catch(error) {
-        res.status(500).send({ status: false, message: 'Create Account Failed' });
+        res.status(500).send({ status: false, message: 'Get Token Balance Failed' });
     }
 }
 
@@ -69,8 +70,9 @@ async function transferToken(req, res) {
     try {
         // contract instance
         const contract = await new web3.eth.Contract(abi, process.env.CONTRACT_ADDRESS);
+        const decimals = await contract.methods.decimals().call();
         // transfer event abi
-        const transferAbi = await contract.methods.transfer(req.body.to, web3.utils.toWei(req.body.amount, 'ether')).encodeABI();
+        const transferAbi = await contract.methods.transfer(req.body.to, (req.body.amount * 10**decimals).toString()).encodeABI();
 
         // Sign transaction
         let signTransaction = await web3.eth.accounts.signTransaction({
